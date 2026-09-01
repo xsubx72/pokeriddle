@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>PokeRiddle</title>
+</head>
+<body>
+  <h1>Adivina el Pokémon</h1>
+  <button id="modo-basico" class="modo-btn">Básico</button>
+  <button id="modo-racha" class="modo-btn">Racha</button>
+  <button id="modo-pokedex" class="modo-btn">Pokédex</button>
+    <br><br>
+   <select id="selector-generacion">
+   <option value="1,151">Generación 1</option>
+   <option value="152,251">Generación 2</option>
+   <option value="252,386">Generación 3</option>
+   <option value="387,493">Generación 4</option>
+   <option value="494,649">Generación 5</option>
+   <option value="650,721">Generación 6</option>
+   <option value="722,809">Generación 7</option>
+   <option value="810,905">Generación 8</option>
+   <option value="906,1025">Generación 9</option>
+   <option value="1,1025">Todas las generaciones</option>
+  </select>
+  <br><br>
+  <img id="pokemon-img" src="" width="200" style="filter: brightness(0);">
+    <br><br>
+    <input type="text" id="respuesta-usuario" placeholder="¿Qué Pokémon es?">
+    <ul id="lista-sugerencias"></ul>
+    <button id="boton-adivinar">Adivinar</button>
+    <button id="boton-siguiente">Siguiente Pokémon</button>
+    <p id="resultado"></p>
+    <p id="pistas"></p>
+  <script>
+    // aquí vamos a escribir tu código
+    let pokemonActual; // aquí guardaremos los datos del pokémon actual
+    let listaNombres = [];
+    let rangoMin = 1;
+    let rangoMax = 151;
+    let intentos = 0;
+    let modoActual = "basico"; // Modo por defecto
+
+    fetch("https://pokeapi.co/api/v2/pokemon?limit=1025")
+      .then(respuesta => respuesta.json())
+      .then(datos=>{
+    // aquí hay que extraer solo los nombres del array "results"
+    // y guardarlos en listaNombres
+    const listapokemons = datos.results;
+    const nombres = listapokemons.map(pokemon => pokemon.name);
+    listaNombres = nombres;
+  });
+
+    function cargarpokemonNuevo() {
+      const numeroRandom = Math.floor(Math.random() * (rangoMax - rangoMin + 1)) + rangoMin; // Genera un número aleatorio entre rangoMin y rangoMax
+      fetch(`https://pokeapi.co/api/v2/pokemon/${numeroRandom}`)
+        .then(respuesta => respuesta.json())
+        .then(datos => {
+          pokemonActual = datos;
+          document.getElementById("pokemon-img").src = datos.sprites.front_default;
+          document.getElementById("pokemon-img").style.filter = "brightness(0)";
+          document.getElementById("resultado").textContent = "";
+          document.getElementById("respuesta-usuario").value = "";
+          intentos = 0;
+          document.getElementById("pistas").innerHTML = ""; // Limpiar las pistas anteriores
+        });
+    }
+    function seleccionarSugerencia(nombre) {
+      document.getElementById("respuesta-usuario").value = nombre;
+      document.getElementById("lista-sugerencias").innerHTML = "";
+    }
+
+    cargarpokemonNuevo(); // Carga un Pokémon al iniciar la página
+    
+    document.getElementById("boton-siguiente").addEventListener("click", function() {
+      cargarpokemonNuevo();
+    });
+
+    document.getElementById("boton-adivinar").addEventListener("click", function() {
+      const respuestaUsuario = document.getElementById("respuesta-usuario").value.toLowerCase();
+      const nombrePokemon = pokemonActual.name.toLowerCase();
+
+      if (respuestaUsuario === nombrePokemon) {
+        document.getElementById("resultado").textContent = "¡Correcto! Es " + pokemonActual.name + ".";
+        document.getElementById("pokemon-img").style.filter = "brightness(1)";
+      } else {
+        intentos = intentos + 1;
+        document.getElementById("resultado").textContent = "Incorrecto. Llevas " + intentos + " intento(s).";
+        if (intentos === 2) {
+         const alturaM = pokemonActual.height / 10; // Convertir a metros
+          const pesoKg = pokemonActual.weight / 10; // Convertir a kilogramos
+            document.getElementById("pistas").innerHTML += "<br>Pista: altura del Pokémon: " + alturaM + " m, peso del Pokémon: " + pesoKg + " kg.";
+        }
+        if (intentos === 3) {
+          document.getElementById("pistas").innerHTML += "<br>Pista: tipo(s) del Pokémon: " + pokemonActual.types.map(t => t.type.name).join(", ");
+        }
+        if (intentos === 4 && rangoMin === 1 && rangoMax === 1025) {
+          let generacion;
+          if (pokemonActual.id <= 151) {
+            generacion = "Generación 1";
+          } else if (pokemonActual.id <= 251) {
+            generacion = "Generación 2";
+          } else if (pokemonActual.id <= 386) {
+            generacion = "Generación 3";
+          } else if (pokemonActual.id <= 493) {
+            generacion = "Generación 4";
+          } else if (pokemonActual.id <= 649) {
+            generacion = "Generación 5";
+          } else if (pokemonActual.id <= 721) {
+            generacion = "Generación 6";
+          } else if (pokemonActual.id <= 809) {
+            generacion = "Generación 7";
+          } else if (pokemonActual.id <= 905) {
+            generacion = "Generación 8";
+          } else {
+            generacion = "Generación 9";
+          }
+          document.getElementById("pistas").innerHTML += "<br>Pista: pertenece a la generación " + generacion;
+        }
+        if (intentos === 5) {
+          document.getElementById("pistas").innerHTML += "<br>Pista: es el número " + pokemonActual.id + " en la Pokédex.";
+        }
+        if (intentos === 6) {
+          document.getElementById("resultado").textContent = "¡Has perdido! El Pokémon era " + pokemonActual.name + ".";
+          document.getElementById("pokemon-img").style.filter = "brightness(1)";
+        }
+      }
+    });
+
+    document.getElementById("respuesta-usuario").addEventListener("input", function() {
+      const textoEscrito = document.getElementById("respuesta-usuario").value.toLowerCase();
+      const coincidencias = listaNombres.filter(nombre => nombre.startsWith(textoEscrito));
+      const html = coincidencias.map(nombre => `<li onclick="seleccionarSugerencia('${nombre}')">${nombre}</li>`).join("");
+      document.getElementById("lista-sugerencias").innerHTML = html;
+    });
+    
+    document.getElementById("selector-generacion").addEventListener("change", function() {
+     const valorSeleccionado = document.getElementById("selector-generacion").value;
+     const rango = valorSeleccionado.split(",");
+     rangoMin = parseInt(rango[0]);
+     rangoMax = parseInt(rango[1]); 
+      
+     cargarpokemonNuevo(); // Carga un Pokémon dentro del rango seleccionado
+    
+    });
+    
+    document.getElementById("modo-basico").addEventListener("click", function() {
+      modoActual = "basico";
+      cargarpokemonNuevo();
+    });
+    
+    document.getElementById("modo-racha").addEventListener("click", function() {
+      modoActual = "racha";
+      cargarpokemonNuevo();
+    });
+    
+    document.getElementById("modo-pokedex").addEventListener("click", function() {
+      modoActual = "pokedex";
+      cargarpokemonNuevo();
+    });
+  </script>
+</body>
+</html>
