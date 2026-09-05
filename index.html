@@ -10,6 +10,8 @@
   <button id="modo-basico" class="modo-btn">Básico</button>
   <button id="modo-racha" class="modo-btn">Racha</button>
   <button id="modo-pokedex" class="modo-btn">Pokédex</button>
+  <button id="boton-progreso" style="display: none;">Ver progreso</button>
+  <div id="cuadricula-progreso" style="display: none;"></div>
   <br><br>
    <select id="selector-generacion">
    <option value="1,151">Generación 1</option>
@@ -30,6 +32,7 @@
     <ul id="lista-sugerencias"></ul>
     <button id="boton-adivinar">Adivinar</button>
     <button id="boton-siguiente">Siguiente Pokémon</button>
+    <p id="racha-visual" style="display: none;">Racha actual: 0 | Mejor racha: 0</p>
     <p id="resultado"></p>
     <p id="pistas"></p>
   <script>
@@ -42,6 +45,13 @@
     let modoActual = "basico"; // Modo por defecto
     let rachaActual = 0; // Contador de racha
     let mejorRacha = 0; // Mejor racha alcanzada
+    let intentosPokedex = 0;
+    let pokedexCompletada = [];
+
+   const guardado = localStorage.getItem("pokedexCompletada");
+    if (guardado) {
+      pokedexCompletada = JSON.parse(guardado);
+    }
 
     fetch("https://pokeapi.co/api/v2/pokemon?limit=1025")
       .then(respuesta => respuesta.json())
@@ -51,8 +61,21 @@
     const listapokemons = datos.results;
     const nombres = listapokemons.map(pokemon => pokemon.name);
     listaNombres = nombres;
-  });
-
+  })
+function mostrarCuadricula() {
+  let html = "";
+  
+  for (let i = rangoMin; i <= rangoMax; i++) {
+    if (pokedexCompletada.includes(i)) {
+      const nombre = listaNombres[i - 1];
+      html += `<span style="background-color: lightgreen; padding: 4px; margin: 2px; display: inline-block; text-align: center;">#${i}<br>${nombre}</span>`;
+    } else {
+      html += `<span style="background-color: lightgray; padding: 4px; margin: 2px; display: inline-block; text-align: center;">#${i}<br>?</span>`;
+    }
+  }
+  
+  document.getElementById("cuadricula-progreso").innerHTML = html;
+}
     function cargarpokemonNuevo() {
       const numeroRandom = Math.floor(Math.random() * (rangoMax - rangoMin + 1)) + rangoMin; // Genera un número aleatorio entre rangoMin y rangoMax
       fetch(`https://pokeapi.co/api/v2/pokemon/${numeroRandom}`)
@@ -65,6 +88,7 @@
           document.getElementById("respuesta-usuario").value = "";
           intentos = 0;
           document.getElementById("pistas").innerHTML = ""; // Limpiar las pistas anteriores
+          intentosPokedex = 0;
         });
     }
     function seleccionarSugerencia(nombre) {
@@ -88,14 +112,47 @@
           if (rachaActual > mejorRacha) {
             mejorRacha = rachaActual;
           }
+          document.getElementById("racha-visual").textContent = "Racha actual: " + rachaActual + " | Mejor racha: " + mejorRacha;
           document.getElementById("resultado").textContent = "¡Correcto! Racha actual: " + rachaActual + ". Mejor racha: " + mejorRacha + ".";
           document.getElementById("pokemon-img").style.filter = "brightness(1)";
         }else {
           rachaActual = 0; // Reinicia la racha si falla
-          document.getElementById("resultado").textContent = "Falleste. Era " + pokemonActual.name + ". Racha reiniciada.";
+          document.getElementById("resultado").textContent = "Falleste. Era " + pokemonActual.name + ".";
           document.getElementById("pokemon-img").style.filter = "brightness(1)";
+          document.getElementById("racha-visual").textContent = "Racha actual: " + rachaActual + " | Mejor racha: " + mejorRacha;
         }
-      }else {
+   }else if (modoActual === "pokedex") {
+       if (respuestaUsuario === nombrePokemon) {
+        document.getElementById("resultado").textContent = "¡Correcto! Es " + pokemonActual.name + ".";
+        document.getElementById("pokemon-img").style.filter = "brightness(1)";
+        if (!pokedexCompletada.includes(pokemonActual.id)) {
+            pokedexCompletada.push(pokemonActual.id);
+            localStorage.setItem("pokedexCompletada", JSON.stringify(pokedexCompletada));
+            mostrarCuadricula(); // Actualiza la cuadrícula de progreso
+          }
+        setTimeout(function() {
+            cargarpokemonNuevo();
+          }, 2500); // Espera 2 segundos antes de cargar el siguiente Pokémon
+      } else {
+       intentosPokedex = intentosPokedex + 1;
+       document.getElementById("resultado").textContent = "Incorrecto. Llevas " + intentosPokedex + " intento(s).";
+
+       if (intentosPokedex === 1) {
+      document.getElementById("pistas").innerHTML += "<br>Pista: tipo(s) del Pokémon: " + pokemonActual.types.map(t => t.type.name).join(", ");
+      }
+
+       if (intentosPokedex === 2) {
+      document.getElementById("pistas").innerHTML += "<br>Pista: es el número " + pokemonActual.id + " en la Pokédex.";
+      }
+
+       if (intentosPokedex === 3) {
+      document.getElementById("resultado").textContent = "Incorrecto. Siguiente pokemon";
+      setTimeout(function() {
+        cargarpokemonNuevo();
+      }, 2500);
+    }
+  }
+     }else {
        if (respuestaUsuario === nombrePokemon) {
         document.getElementById("resultado").textContent = "¡Correcto! Es " + pokemonActual.name + ".";
         document.getElementById("pokemon-img").style.filter = "brightness(1)";
@@ -164,20 +221,40 @@
     document.getElementById("modo-basico").addEventListener("click", function() {
       modoActual = "basico";
       document.getElementById("modo-visual").textContent = "Modo actual: Básico";
+      document.getElementById("racha-visual").style.display = "none";
+      document.getElementById("boton-progreso").style.display = "none"; // Oculta el botón de progreso en modo básico
+      document.getElementById("lista-progreso").style.display = "none"; // Oculta la lista de progreso en modo básico
       cargarpokemonNuevo();
     });
     
     document.getElementById("modo-racha").addEventListener("click", function() {
       modoActual = "racha";
       document .getElementById("modo-visual").textContent = "Modo actual: Racha";
+      document.getElementById("racha-visual").style.display = "block";
+      document.getElementById("boton-progreso").style.display = "none"; // Oculta el botón de progreso en modo racha
+      document.getElementById("lista-progreso").style.display = "none"; // Oculta la lista de progreso en modo racha
       cargarpokemonNuevo();
     });
     
     document.getElementById("modo-pokedex").addEventListener("click", function() {
       modoActual = "pokedex";
       document.getElementById("modo-visual").textContent = "Modo actual: Pokédex";
+      document.getElementById("racha-visual").style.display = "none";
+      document.getElementById("boton-progreso").style.display = "block"; // Muestra el botón de progreso en modo Pokédex
+      document.getElementById("lista-progreso").style.display = "block"; // Muestra la lista de progreso al cambiar a modo Pokédex
       cargarpokemonNuevo();
     });
+
+   document.getElementById("boton-progreso").addEventListener("click", function() {
+  const contenedor = document.getElementById("cuadricula-progreso");
+  
+  if (contenedor.style.display === "none") {
+    mostrarCuadricula();
+    contenedor.style.display = "block";
+  } else {
+    contenedor.style.display = "none";
+  }
+}) 
   </script>
 </body>
 </html>
