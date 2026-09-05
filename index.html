@@ -11,6 +11,7 @@
   <button id="modo-racha" class="modo-btn">Racha</button>
   <button id="modo-pokedex" class="modo-btn">Pokédex</button>
   <button id="boton-progreso" style="display: none;">Ver progreso</button>
+  <Button id="boton-reiniciar" style="display: none;">Reiniciar progreso</button>
   <div id="cuadricula-progreso" style="display: none;"></div>
   <br><br>
    <select id="selector-generacion">
@@ -223,7 +224,8 @@ function mostrarCuadricula() {
       document.getElementById("modo-visual").textContent = "Modo actual: Básico";
       document.getElementById("racha-visual").style.display = "none";
       document.getElementById("boton-progreso").style.display = "none"; // Oculta el botón de progreso en modo básico
-      document.getElementById("lista-progreso").style.display = "none"; // Oculta la lista de progreso en modo básico
+      document.getElementById("cuadricula-progreso").style.display = "none"; // Oculta la lista de progreso en modo básico
+      document.getElementById("boton-reiniciar").style.display = "none"; // Oculta el botón de reiniciar progreso en modo básico
       cargarpokemonNuevo();
     });
     
@@ -232,7 +234,8 @@ function mostrarCuadricula() {
       document .getElementById("modo-visual").textContent = "Modo actual: Racha";
       document.getElementById("racha-visual").style.display = "block";
       document.getElementById("boton-progreso").style.display = "none"; // Oculta el botón de progreso en modo racha
-      document.getElementById("lista-progreso").style.display = "none"; // Oculta la lista de progreso en modo racha
+      document.getElementById("cuadricula-progreso").style.display = "none"; // Oculta la lista de progreso en modo racha
+      document.getElementById("boton-reiniciar").style.display = "none"; // Oculta el botón de reiniciar progreso en modo racha
       cargarpokemonNuevo();
     });
     
@@ -241,7 +244,8 @@ function mostrarCuadricula() {
       document.getElementById("modo-visual").textContent = "Modo actual: Pokédex";
       document.getElementById("racha-visual").style.display = "none";
       document.getElementById("boton-progreso").style.display = "block"; // Muestra el botón de progreso en modo Pokédex
-      document.getElementById("lista-progreso").style.display = "block"; // Muestra la lista de progreso al cambiar a modo Pokédex
+      document.getElementById("cuadricula-progreso").style.display = "block"; // Muestra la lista de progreso al cambiar a modo Pokédex
+      document.getElementById("boton-reiniciar").style.display = "block"; // Muestra el botón de reiniciar progreso en modo Pokédex
       cargarpokemonNuevo();
     });
 
@@ -255,6 +259,15 @@ function mostrarCuadricula() {
     contenedor.style.display = "none";
   }
 }) 
+
+   document.getElementById("boton-reiniciar").addEventListener("click", function() {
+  if (confirm("¿Estás seguro de que quieres reiniciar tu progreso?")) {
+    pokedexCompletada = [];
+    localStorage.removeItem("pokedexCompletada");
+    mostrarCuadricula(); // Actualiza la cuadrícula de progreso
+  }
+});
+
   </script>
 </body>
 </html>
