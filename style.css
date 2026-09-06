@@ -27,6 +27,8 @@ body {
 }
 .columna-derecha {
   width: 350px;
+  background-color: #0701166e;
+  color: white;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -233,7 +235,7 @@ body {
 }
 
 #boton-reiniciar {
-  background-color: transparent;
+  background-color: white;
   color: #E53935;
   border: 2px solid #E53935;
 }
