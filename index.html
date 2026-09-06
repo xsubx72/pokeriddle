@@ -119,21 +119,30 @@ function mostrarCuadricula() {
   
   document.getElementById("cuadricula-progreso").innerHTML = html;
 }
-    function cargarpokemonNuevo() {
-      const numeroRandom = Math.floor(Math.random() * (rangoMax - rangoMin + 1)) + rangoMin; // Genera un número aleatorio entre rangoMin y rangoMax
-      fetch(`https://pokeapi.co/api/v2/pokemon/${numeroRandom}`)
-        .then(respuesta => respuesta.json())
-        .then(datos => {
-          pokemonActual = datos;
-          document.getElementById("pokemon-img").src = datos.sprites.front_default;
-          document.getElementById("pokemon-img").style.filter = "brightness(0)";
-          document.getElementById("resultado").textContent = "";
-          document.getElementById("respuesta-usuario").value = "";
-          intentos = 0;
-          document.getElementById("pistas").innerHTML = ""; // Limpiar las pistas anteriores
-          intentosPokedex = 0;
-        });
-    }
+   function cargarpokemonNuevo() {
+  let numeroRandom;
+
+  if (modoActual === "pokedex") {
+    do {
+      numeroRandom = Math.floor(Math.random() * (rangoMax - rangoMin + 1)) + rangoMin;
+    } while (pokedexCompletada.includes(numeroRandom));
+  } else {
+    numeroRandom = Math.floor(Math.random() * (rangoMax - rangoMin + 1)) + rangoMin;
+  }
+
+  fetch(`https://pokeapi.co/api/v2/pokemon/${numeroRandom}`)
+    .then(respuesta => respuesta.json())
+    .then(datos => {
+      pokemonActual = datos;
+      document.getElementById("pokemon-img").src = datos.sprites.front_default;
+      document.getElementById("pokemon-img").style.filter = "brightness(0)";
+      document.getElementById("resultado").textContent = "";
+      document.getElementById("respuesta-usuario").value = "";
+      intentos = 0;
+      document.getElementById("pistas").innerHTML = "";
+      intentosPokedex = 0;
+    });
+}
     function seleccionarSugerencia(nombre) {
       document.getElementById("respuesta-usuario").value = nombre;
       document.getElementById("lista-sugerencias").innerHTML = "";
