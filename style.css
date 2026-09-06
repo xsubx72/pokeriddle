@@ -244,3 +244,67 @@ body {
   background-color: #E53935;
   color: white;
 }
+.grupo-modos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .contenedor-principal {
+    flex-direction: column;
+  }
+
+  .columna-izquierda,
+  .columna-derecha {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .columna-izquierda {
+  padding: 12px;
+  gap: 8px;
+}
+
+.columna-izquierda h1 {
+  font-size: 20px;
+}
+
+.columna-izquierda > div:nth-of-type(1) {
+  display: flex;
+  gap: 8px;
+}
+
+.modo-btn {
+  padding: 8px 10px;
+  font-size: 12px;
+  flex: 1;
+}
+.grupo-modos {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.modo-btn {
+  padding: 8px 10px;
+  font-size: 12px;
+  flex: 1;
+}
+#overlay-progreso {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#cuadricula-progreso {
+  max-width: 90%;
+  max-height: 70vh;
+}
+
+}

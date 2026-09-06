@@ -6,15 +6,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
   <div class="contenedor-principal">
     <div class="columna-izquierda">
         <h1>Adivina el Pokémon</h1>
         <p id="modo-visual">Modo actual: Básico</p>
-          <button id="modo-basico" class="modo-btn">Básico</button>
-          <button id="modo-racha" class="modo-btn">Racha</button>
-          <button id="modo-pokedex" class="modo-btn">Pokédex</button>
+         <div class="grupo-modos">
+            <button id="modo-basico" class="modo-btn">Básico</button>
+            <button id="modo-racha" class="modo-btn">Racha</button>
+            <button id="modo-pokedex" class="modo-btn">Pokédex</button>
+          </div>
           <select id="selector-generacion">
           <option value="1,151">Generación 1</option>
           <option value="152,251">Generación 2</option>
@@ -57,7 +60,9 @@
     </div>
       <button id="boton-progreso" style="display: none;">Ver progreso</button>
       <Button id="boton-reiniciar" style="display: none;">Reiniciar progreso</button>
-      <div id="cuadricula-progreso" style="display: none;"></div>
+      <div id="overlay-progreso" style="display: none;">
+        <div id="cuadricula-progreso"></div>
+      </div>
     </div>
   </div>
   <script>
@@ -286,16 +291,16 @@ function mostrarCuadricula() {
       cargarpokemonNuevo();
     });
 
-   document.getElementById("boton-progreso").addEventListener("click", function() {
-  const contenedor = document.getElementById("cuadricula-progreso");
+  document.getElementById("boton-progreso").addEventListener("click", function() {
+    const overlay = document.getElementById("overlay-progreso");
   
-  if (contenedor.style.display === "none") {
+  if (overlay.style.display === "none" || overlay.style.display === "") {
     mostrarCuadricula();
-    contenedor.style.display = "block";
+    overlay.style.display = "flex";
   } else {
-    contenedor.style.display = "none";
+    overlay.style.display = "none";
   }
-}) 
+});
 
    document.getElementById("boton-reiniciar").addEventListener("click", function() {
   if (confirm("¿Estás seguro de que quieres reiniciar tu progreso?")) {
@@ -305,6 +310,11 @@ function mostrarCuadricula() {
   }
 });
 
+document.getElementById("overlay-progreso").addEventListener("click", function(event) {
+  if (event.target.id === "overlay-progreso") {
+    document.getElementById("overlay-progreso").style.display = "none";
+  }
+});
   </script>
 </body>
 </html>
