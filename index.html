@@ -126,6 +126,7 @@ function mostrarCuadricula() {
     do {
       numeroRandom = Math.floor(Math.random() * (rangoMax - rangoMin + 1)) + rangoMin;
     } while (pokedexCompletada.includes(numeroRandom));
+    console.log("Modo pokedex, numero elegido:", numeroRandom, "¿estaba completado?", pokedexCompletada.includes(numeroRandom));
   } else {
     numeroRandom = Math.floor(Math.random() * (rangoMax - rangoMin + 1)) + rangoMin;
   }
